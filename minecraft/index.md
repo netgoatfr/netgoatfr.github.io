@@ -1,0 +1,9 @@
+# Here are some of my scripts to be used on minecraft smps.
+> Hey there i'm netgoatfr :]
+
+
+# Scripts
+> [!IMPORTANT]  
+> Most .py scripts will require the mod [minescript](https://minescript.net/) which is a **very** handy mod that allow for client side scripting easily
+
+##
