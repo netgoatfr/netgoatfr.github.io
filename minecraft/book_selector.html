@@ -80,30 +80,71 @@
         <div class="section-title"><strong>Build a book</strong><div class="small muted">Current book composition</div></div>
         <div style="display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;gap:10px;align-items:center">
-            <select id="enchantSelect" aria-label="enchantment">
-              <option value="Sharpness" data-max="5">Sharpness</option>
-              <option value="Smite" data-max="5">Smite</option>
-              <option value="Bane of Arthropods" data-max="5">Bane of Arthropods</option>
-              <option value="Protection" data-max="4">Protection</option>
-              <option value="Fire Protection" data-max="4">Fire Protection</option>
-              <option value="Projectile Protection" data-max="4">Projectile Protection</option>
-              <option value="Blast Protection" data-max="4">Blast Protection</option>
-              <option value="Efficiency" data-max="5">Efficiency</option>
-              <option value="Unbreaking" data-max="3">Unbreaking</option>
-              <option value="Mending" data-max="1">Mending</option>
-              <option value="Fortune" data-max="3">Fortune</option>
-              <option value="Silk Touch" data-max="1">Silk Touch</option>
-              <option value="Thorns" data-max="3">Thorns</option>
-              <option value="Knockback" data-max="2">Knockback</option>
-              <option value="Looting" data-max="3">Looting</option>
-              <option value="Power" data-max="5">Power</option>
-              <option value="Punch" data-max="2">Punch</option>
-              <option value="Flame" data-max="1">Flame</option>
-              <option value="Infinity" data-max="1">Infinity</option>
-              <option value="Respiration" data-max="3">Respiration</option>
-              <option value="Aqua Affinity" data-max="1">Aqua Affinity</option>
-              <option value="Depth Strider" data-max="3">Depth Strider</option>
-              <option value="Frost Walker" data-max="2">Frost Walker</option>
+           <select id="enchantSelect" aria-label="enchantment">
+              <!-- Weapon - Damage -->
+              <option value="sharpness" data-max="5">Sharpness</option>
+              <option value="smite" data-max="5">Smite</option>
+              <option value="bane_of_arthropods" data-max="5">Bane of Arthropods</option>
+              
+              <!-- Weapon - Other -->
+              <option value="knockback" data-max="2">Knockback</option>
+              <option value="fire_aspect" data-max="2">Fire Aspect</option>
+              <option value="looting" data-max="3">Looting</option>
+              <option value="sweeping_edge" data-max="3">Sweeping Edge</option>
+              
+              <!-- Armor - Protection -->
+              <option value="protection" data-max="4">Protection</option>
+              <option value="fire_protection" data-max="4">Fire Protection</option>
+              <option value="projectile_protection" data-max="4">Projectile Protection</option>
+              <option value="blast_protection" data-max="4">Blast Protection</option>
+              <option value="thorns" data-max="3">Thorns</option>
+              
+              <!-- Armor - Helmet -->
+              <option value="respiration" data-max="3">Respiration</option>
+              <option value="aqua_affinity" data-max="1">Aqua Affinity</option>
+              
+              <!-- Armor - Boots -->
+              <option value="feather_falling" data-max="4">Feather Falling</option>
+              <option value="depth_strider" data-max="3">Depth Strider</option>
+              <option value="frost_walker" data-max="2">Frost Walker</option>
+              <option value="soul_speed" data-max="3">Soul Speed</option>
+              
+              <!-- Armor - Leggings -->
+              <option value="swift_sneak" data-max="3">Swift Sneak</option>
+              
+              <!-- Bow -->
+              <option value="power" data-max="5">Power</option>
+              <option value="punch" data-max="2">Punch</option>
+              <option value="flame" data-max="1">Flame</option>
+              <option value="infinity" data-max="1">Infinity</option>
+              
+              <!-- Crossbow -->
+              <option value="quick_charge" data-max="3">Quick Charge</option>
+              <option value="multishot" data-max="1">Multishot</option>
+              <option value="piercing" data-max="4">Piercing</option>
+              
+              <!-- Trident -->
+              <option value="loyalty" data-max="3">Loyalty</option>
+              <option value="impaling" data-max="5">Impaling</option>
+              <option value="riptide" data-max="3">Riptide</option>
+              <option value="channeling" data-max="1">Channeling</option>
+              
+              <!-- Tools -->
+              <option value="efficiency" data-max="5">Efficiency</option>
+              <option value="fortune" data-max="3">Fortune</option>
+              <option value="silk_touch" data-max="1">Silk Touch</option>
+              
+              <!-- Fishing Rod -->
+              <option value="luck_of_the_sea" data-max="3">Luck of the Sea</option>
+              <option value="lure" data-max="3">Lure</option>
+              
+              <!-- Universal -->
+              <option value="unbreaking" data-max="3">Unbreaking</option>
+              <option value="mending" data-max="1">Mending</option>
+              
+              <!-- Curses -->
+              <option value="curse_of_vanishing" data-max="1">Curse of Vanishing</option>
+              <option value="curse_of_binding" data-max="1">Curse of Binding</option>
             </select>
             <select id="levelSelect" aria-label="level"></select>
             <button id="addEnchantBtn" class="btn" title="Add enchantment">
@@ -187,7 +228,7 @@
     }
 
     function updateJSON(){
-      const arr=state.books.map(b=>{const obj={};b.enchants.forEach(e=>obj[e.name.toLowerCase()]=e.level);return obj;});
+      const arr=state.books.map(b=>{const obj={};b.enchants.forEach(e=>obj[e.name]=e.level);return obj;});
       try{jsonOutEl.textContent=JSON.stringify(arr,null,2);}catch(e){jsonOutEl.textContent='[]';}
     }
 
