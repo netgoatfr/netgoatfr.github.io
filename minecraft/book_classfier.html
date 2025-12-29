@@ -23,14 +23,15 @@
 
 const EXPONENT = 2.0;
 
-// Enchant database
+// Enchant map
 const ENCHANTS = {
+  // Durability
   mending: {
     max: 1,
     items: [
       "sword","axe","bow","crossbow","trident",
       "helmet","chestplate","leggings","boots",
-      "shield","tool","fishing_rod"
+      "shield","tool","fishing_rod","elytra","shears","flint_and_steel","carrot_on_a_stick","warped_fungus_on_a_stick"
     ],
     modifier: 0.25
   },
@@ -39,10 +40,12 @@ const ENCHANTS = {
     items: [
       "sword","axe","bow","crossbow","trident",
       "helmet","chestplate","leggings","boots",
-      "shield","tool","fishing_rod"
+      "shield","tool","fishing_rod","elytra","shears","flint_and_steel","carrot_on_a_stick","warped_fungus_on_a_stick"
     ],
     modifier: 0.25
   },
+  
+  // Armor - General Protection
   protection: {
     max: 4,
     items: ["helmet","chestplate","leggings","boots"],
@@ -53,13 +56,205 @@ const ENCHANTS = {
     items: ["helmet","chestplate","leggings","boots"],
     modifier: -0.25
   },
-  sharpness: { max: 5, items: ["sword","axe"], modifier: 0.0 },
-  sweeping_edge: { max: 3, items: ["sword"], modifier: 0.0 },
-  bane_of_arthropods: { max: 5, items: ["sword","axe"], modifier: -0.25 },
-  loyalty: { max: 3, items: ["trident"], modifier: 0.0 },
-  impaling: { max: 5, items: ["trident"], modifier: 0.0 },
-  power: { max: 5, items: ["bow"], modifier: 0.0 },
-  efficiency: { max: 5, items: ["tool"], modifier: 0.0 }
+  fire_protection: {
+    max: 4,
+    items: ["helmet","chestplate","leggings","boots"],
+    modifier: -0.25
+  },
+  projectile_protection: {
+    max: 4,
+    items: ["helmet","chestplate","leggings","boots"],
+    modifier: -0.25
+  },
+  
+  // Armor - Helmet
+  respiration: {
+    max: 3,
+    items: ["helmet"],
+    modifier: 0.0
+  },
+  aqua_affinity: {
+    max: 1,
+    items: ["helmet"],
+    modifier: 0.0
+  },
+  
+  // Armor - Boots
+  feather_falling: {
+    max: 4,
+    items: ["boots"],
+    modifier: 0.25
+  },
+  depth_strider: {
+    max: 3,
+    items: ["boots"],
+    modifier: 0.0
+  },
+  frost_walker: {
+    max: 2,
+    items: ["boots"],
+    modifier: 0.0
+  },
+  soul_speed: {
+    max: 3,
+    items: ["boots"],
+    modifier: 0.0
+  },
+  swift_sneak: {
+    max: 3,
+    items: ["leggings"],
+    modifier: 0.0
+  },
+  
+  // Armor - Thorns
+  thorns: {
+    max: 3,
+    items: ["helmet","chestplate","leggings","boots"],
+    modifier: -0.25
+  },
+  
+  // Sword
+  sharpness: { 
+    max: 5, 
+    items: ["sword","axe"], 
+    modifier: 0.0 
+  },
+  smite: { 
+    max: 5, 
+    items: ["sword","axe"], 
+    modifier: -0.25 
+  },
+  bane_of_arthropods: { 
+    max: 5, 
+    items: ["sword","axe"], 
+    modifier: -0.25 
+  },
+  knockback: { 
+    max: 2, 
+    items: ["sword"], 
+    modifier: -0.25 
+  },
+  fire_aspect: { 
+    max: 2, 
+    items: ["sword"], 
+    modifier: 0.0 
+  },
+  looting: { 
+    max: 3, 
+    items: ["sword"], 
+    modifier: 0.25 
+  },
+  sweeping_edge: { 
+    max: 3, 
+    items: ["sword"], 
+    modifier: 0.0 
+  },
+  
+  // Trident
+  loyalty: { 
+    max: 3, 
+    items: ["trident"], 
+    modifier: 0.0 
+  },
+  impaling: { 
+    max: 5, 
+    items: ["trident"], 
+    modifier: 0.0 
+  },
+  riptide: { 
+    max: 3, 
+    items: ["trident"], 
+    modifier: 0.0 
+  },
+  channeling: { 
+    max: 1, 
+    items: ["trident"], 
+    modifier: 0.0 
+  },
+  
+  // Bow
+  power: { 
+    max: 5, 
+    items: ["bow"], 
+    modifier: 0.0 
+  },
+  punch: { 
+    max: 2, 
+    items: ["bow"], 
+    modifier: -0.25 
+  },
+  flame: { 
+    max: 1, 
+    items: ["bow"], 
+    modifier: 0.0 
+  },
+  infinity: { 
+    max: 1, 
+    items: ["bow"], 
+    modifier: 0.25 
+  },
+  
+  // Crossbow
+  quick_charge: { 
+    max: 3, 
+    items: ["crossbow"], 
+    modifier: 0.0 
+  },
+  multishot: { 
+    max: 1, 
+    items: ["crossbow"], 
+    modifier: 0.0 
+  },
+  piercing: { 
+    max: 4, 
+    items: ["crossbow"], 
+    modifier: 0.0 
+  },
+  
+  // Tools
+  efficiency: { 
+    max: 5, 
+    items: ["tool"], 
+    modifier: 0.0 
+  },
+  silk_touch: { 
+    max: 1, 
+    items: ["tool"], 
+    modifier: 0.25 
+  },
+  fortune: { 
+    max: 3, 
+    items: ["tool"], 
+    modifier: 0.25 
+  },
+  
+  // Fishing Rod
+  luck_of_the_sea: { 
+    max: 3, 
+    items: ["fishing_rod"], 
+    modifier: 0.25 
+  },
+  lure: { 
+    max: 3, 
+    items: ["fishing_rod"], 
+    modifier: 0.0 
+  },
+  
+  // Curse Enchantments
+  curse_of_vanishing: {
+    max: 1,
+    items: [
+      "sword","axe","bow","crossbow","trident",
+      "helmet","chestplate","leggings","boots",
+      "shield","tool","fishing_rod","elytra","shears"
+    ],
+    modifier: -0.5
+  },
+  curse_of_binding: {
+    max: 1,
+    items: ["helmet","chestplate","leggings","boots","elytra"],
+    modifier: -0.5
+  }
 };
 
 // Collect all items
