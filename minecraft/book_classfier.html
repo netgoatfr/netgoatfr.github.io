@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book classifier - netgoatfr</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    form.classify {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 500px;
+}
+
+  </style>
+</head>
+<body>
+<script>
+/* -------------------------
+   CONFIGURATION
+------------------------- */
+
+const EXPONENT = 2.0;
+
+// Enchant database
+const ENCHANTS = {
+  mending: {
+    max: 1,
+    items: [
+      "sword","axe","bow","crossbow","trident",
+      "helmet","chestplate","leggings","boots",
+      "shield","tool","fishing_rod"
+    ],
+    modifier: 0.25
+  },
+  unbreaking: {
+    max: 3,
+    items: [
+      "sword","axe","bow","crossbow","trident",
+      "helmet","chestplate","leggings","boots",
+      "shield","tool","fishing_rod"
+    ],
+    modifier: 0.25
+  },
+  protection: {
+    max: 4,
+    items: ["helmet","chestplate","leggings","boots"],
+    modifier: 0.25
+  },
+  blast_protection: {
+    max: 4,
+    items: ["helmet","chestplate","leggings","boots"],
+    modifier: -0.25
+  },
+  sharpness: { max: 5, items: ["sword","axe"], modifier: 0.0 },
+  sweeping_edge: { max: 3, items: ["sword"], modifier: 0.0 },
+  bane_of_arthropods: { max: 5, items: ["sword","axe"], modifier: -0.25 },
+  loyalty: { max: 3, items: ["trident"], modifier: 0.0 },
+  impaling: { max: 5, items: ["trident"], modifier: 0.0 },
+  power: { max: 5, items: ["bow"], modifier: 0.0 },
+  efficiency: { max: 5, items: ["tool"], modifier: 0.0 }
+};
+
+// Collect all items
+const ALL_ITEMS = [...new Set(
+  Object.values(ENCHANTS).flatMap(e => e.items)
+)].sort();
+
+/* -------------------------
+   SCORING FUNCTIONS
+------------------------- */
+
+function scaledLevelScore(level, maxLevel) {
+  return Math.pow(level / maxLevel, EXPONENT);
+}
+
+function scoreBook(book) {
+  const itemScores = {};
+  const breakdown = {};
+
+  for (const item of ALL_ITEMS) {
+    itemScores[item] = 0;
+    breakdown[item] = [];
+
+    for (const enchant in book) {
+      if (!(enchant in ENCHANTS)) {
+        console.warn("Unknown enchant:", enchant);
+        continue;
+      }
+
+      const data = ENCHANTS[enchant];
+      if (!data.items.includes(item)) continue;
+
+      const level = book[enchant];
+      const scaled = scaledLevelScore(level, data.max);
+      const score = scaled + data.modifier;
+
+      itemScores[item] += score;
+      breakdown[item].push(
+        `${enchant} ${level}/${data.max} ` +
+        `(scaled=${scaled.toFixed(2)}, mod=${data.modifier >= 0 ? "+" : ""}${data.modifier.toFixed(2)})`
+      );
+    }
+  }
+
+  return { itemScores, breakdown };
+}
+
+/* -------------------------
+   BOOK EVALUATION & RANKING
+------------------------- */
+
+function evaluateBooks(books) {
+  const results = [];
+
+  books.forEach((book, index) => {
+    const { itemScores, breakdown } = scoreBook(book);
+
+    const scores = Object.values(itemScores);
+    const bestScore = scores.length ? Math.max(...scores) : 0;
+
+    const bestItems = Object.entries(itemScores)
+      .filter(([, score]) => score === bestScore)
+      .map(([item]) => item);
+
+    results.push({
+      index,
+      book,
+      itemScores,
+      breakdown,
+      bestScore,
+      bestItems
+    });
+  });
+
+  results.sort((a, b) => b.bestScore - a.bestScore);
+  return results;
+}
+
+</script>
+  <h1> Minecraft book classifier</h1>
+  <p>Note: there is both axe and tools as items, because axe is considered here as the weapon. The axe you would use to chop tree is considered as a tool.</p>
+  <form name="classify" class="classify">
+    <label>Enter your book data (from the book copy script):
+    </label>
+    <textarea name="data" autocomplete="off" cols="50" rows="8" placeholder='[{"sharpness":5, "unbreaking": 2}, ...]'></textarea>
+    <div>
+      <input type="checkbox" id="verbose" name="verbose" />
+      <label for="verbose">Verbose (More info)</label>
+    </div>
+    <input type="submit" value="Classify">
+    <textarea name="result" autocomplete="off" cols="50" rows="20" readonly></textarea>
+  </form>
+  <script>
+    const form = document.forms.classify;
+    form.addEventListener("submit", (event) => {
+      event.preventDefault(); // stop default submission
+      try {
+        const data = form.elements.data.value;
+        const verbose = form.elements.verbose.checked;
+        const books = JSON.parse(data);
+        const result_area = form.elements.result;
+        result_area.value = "";
+        const ranked = evaluateBooks(books);
+        ranked.forEach((entry, i) => {
+          result_area.value += `Rank #${i + 1}\n`
+          result_area.value += "Book: " + JSON.stringify(entry.book) + "\n";
+          result_area.value += "Best score: " + entry.bestScore.toFixed(2) + "\n";
+          result_area.value += "Best items: " + entry.bestItems + "\n";
+          if (verbose) {
+            result_area.value += "Breakdown: \n"
+            Object.keys(entry.breakdown).sort((a, b) => entry.itemScores[b] - entry.itemScores[a]).forEach(key => {
+                result_area.value += "  " + key + ": " + entry.itemScores[key].toString() + "\n"
+                entry.breakdown[key].forEach(line => {
+                     result_area.value += "  - " + line + "\n"
+                })
+            })
+          }
+          result_area.value += "----\n";
+        });
+      } catch (err) {
+        console.error(err);
+        alert(err);
+      }
+      
+    });
+
+  </script>
+</body>
+</html>
