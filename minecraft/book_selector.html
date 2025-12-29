@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Enchanted Books Selector</title>
+  <style>
+    :root{
+      --bg:#0e1218;
+      --card:#1a1f28;
+      --muted:#9aa6b2;
+      --accent:#7dd3fc;
+      --accent-2:#60a5fa;
+      --glass: rgba(255,255,255,0.1);
+      --radius:10px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:#dbe7ee; -webkit-font-smoothing:antialiased; padding:28px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .wrap{width:100%; max-width:1100px}
+    header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(32,64,96,0.45)}
+    .logo svg{filter:drop-shadow(0 6px 12px rgba(0,0,0,0.6))}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px}
+    .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:0 6px 26px rgba(2,6,23,0.6)}
+    .section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .muted{color:var(--muted);font-size:13px}
+    select{
+      appearance:none;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,0.15);
+      padding:10px;
+      border-radius:8px;
+      color:#dbe7ee;
+      font-size:13px;
+      min-width:170px;
+    }
+    select option{background:var(--card); color:#dbe7ee;}
+    .btn{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.1);padding:8px 10px;border-radius:8px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;color:#dbe7ee}
+    .btn.primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#012; font-weight:600}
+    .btn.ghost{background:transparent; color:#dbe7ee; border:1px solid rgba(255,255,255,0.15)}
+    .btn:active{transform:translateY(1px)}
+    .list{max-height:320px;overflow:auto;padding:6px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+    .item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:8px;margin-bottom:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
+    .item .left{display:flex;gap:10px;align-items:center}
+    .pill{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:6px;font-size:13px;color:var(--muted)}
+    .enchants{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{background:rgba(0,0,0,0.18);padding:6px 8px;border-radius:999px;font-size:13px;color:#dbe7ee}
+    pre#jsonOut{white-space:pre-wrap;overflow:auto;padding:12px;border-radius:8px;background:rgba(1,4,9,0.5);max-height:280px;color:#dbe7ee}
+    .small{font-size:12px;color:var(--muted)}
+    .icon{width:18px;height:18px;display:inline-block}
+    .icon-sm{width:14px;height:14px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo" aria-hidden>
+        <svg viewBox="0 0 48 48" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="10" width="30" height="28" rx="3" fill="white" opacity="0.06"/>
+          <path d="M12 14v18c4-1 8-1 12 1V15c-4-2-8-2-12-1z" fill="white" opacity="0.06"/>
+          <g fill="white"><circle cx="39" cy="9" r="1.8" opacity="0.95"/><path d="M39 5.6l.8 1.9 1.9.8-1.9.8L39 11.0l-.8-1.9-1.9-.8 1.9-.8L39 5.6z" opacity="0.95"/></g>
+        </svg>
+      </div>
+      <div>
+        <h1>Enchanted Books Selector — netgoatfr</h1>
+        <p>Made by AI, fixed by me</p>
+        <p class="lead">Select multiple enchantments per book, build a list, export JSON.</p>
+      </div>
+    </header>
+    <div class="grid">
+      <section class="card">
+        <div class="section-title"><strong>Build a book</strong><div class="small muted">Current book composition</div></div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;gap:10px;align-items:center">
+            <select id="enchantSelect" aria-label="enchantment">
+              <option value="Sharpness" data-max="5">Sharpness</option>
+              <option value="Smite" data-max="5">Smite</option>
+              <option value="Bane of Arthropods" data-max="5">Bane of Arthropods</option>
+              <option value="Protection" data-max="4">Protection</option>
+              <option value="Fire Protection" data-max="4">Fire Protection</option>
+              <option value="Projectile Protection" data-max="4">Projectile Protection</option>
+              <option value="Blast Protection" data-max="4">Blast Protection</option>
+              <option value="Efficiency" data-max="5">Efficiency</option>
+              <option value="Unbreaking" data-max="3">Unbreaking</option>
+              <option value="Mending" data-max="1">Mending</option>
+              <option value="Fortune" data-max="3">Fortune</option>
+              <option value="Silk Touch" data-max="1">Silk Touch</option>
+              <option value="Thorns" data-max="3">Thorns</option>
+              <option value="Knockback" data-max="2">Knockback</option>
+              <option value="Looting" data-max="3">Looting</option>
+              <option value="Power" data-max="5">Power</option>
+              <option value="Punch" data-max="2">Punch</option>
+              <option value="Flame" data-max="1">Flame</option>
+              <option value="Infinity" data-max="1">Infinity</option>
+              <option value="Respiration" data-max="3">Respiration</option>
+              <option value="Aqua Affinity" data-max="1">Aqua Affinity</option>
+              <option value="Depth Strider" data-max="3">Depth Strider</option>
+              <option value="Frost Walker" data-max="2">Frost Walker</option>
+            </select>
+            <select id="levelSelect" aria-label="level"></select>
+            <button id="addEnchantBtn" class="btn" title="Add enchantment">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Add
+            </button>
+          </div>
+          <div class="list" id="currentEnchants"><div class="small muted" style="padding:8px">No enchantments yet — add one to start.</div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="addBookBtn" class="btn primary">Add book to list</button>
+            <button id="clearBookBtn" class="btn ghost">Clear book</button>
+            <div style="margin-left:auto" class="small muted">Tip: duplicate enchantments are prevented.</div>
+          </div>
+        </div>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:14px 0" />
+        <div>
+          <div class="section-title"><strong>Books</strong><div class="small muted">List of books you've built</div></div>
+          <div class="list" id="booksList"><div class="small muted" style="padding:8px">No books yet — add a book to populate the list.</div></div>
+          <div class="controls">
+            <button id="clearAllBtn" class="btn ghost">Clear all</button>
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button id="downloadBtn" class="btn">Download JSON</button>
+              <button id="copyBtn" class="btn">Copy JSON</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <aside class="card">
+        <div class="section-title"><strong>JSON Output</strong><span class="small muted">Array of objects: enchantName:level</span></div>
+        <pre id="jsonOut">[]</pre>
+      </aside>
+    </div>
+  </div>
+  <script>
+    const state = {currentEnchants: [], books: []};
+    const enchantSelect = document.getElementById('enchantSelect');
+    const levelSelect = document.getElementById('levelSelect');
+    const addEnchantBtn = document.getElementById('addEnchantBtn');
+    const currentEnchantsEl = document.getElementById('currentEnchants');
+    const addBookBtn = document.getElementById('addBookBtn');
+    const clearBookBtn = document.getElementById('clearBookBtn');
+    const booksListEl = document.getElementById('booksList');
+    const jsonOutEl = document.getElementById('jsonOut');
+
+    function populateLevels(){
+      const max = parseInt(enchantSelect.selectedOptions[0].dataset.max,10);
+      levelSelect.innerHTML='';
+      for(let i=1;i<=max;i++){
+        const opt = document.createElement('option'); opt.value=i; opt.textContent=toRoman(i); levelSelect.appendChild(opt);
+      }
+    }
+    enchantSelect.addEventListener('change', populateLevels);
+    populateLevels();
+
+    function renderCurrentEnchants(){
+      currentEnchantsEl.innerHTML='';
+      if(state.currentEnchants.length===0){currentEnchantsEl.innerHTML='<div class="small muted" style="padding:8px">No enchantments yet — add one to start.</div>';return;}
+      state.currentEnchants.forEach((e,i)=>{
+        const div=document.createElement('div');div.className='item';
+        const left=document.createElement('div');left.className='left';
+        const pill=document.createElement('div');pill.className='pill';pill.textContent=e.name+' '+toRoman(e.level);left.appendChild(pill);div.appendChild(left);
+        const right=document.createElement('div');
+        const btn=document.createElement('button');btn.className='btn ghost';btn.title='Remove';btn.innerHTML=svg('trash');btn.onclick=()=>{state.currentEnchants.splice(i,1);renderCurrentEnchants();};right.appendChild(btn);div.appendChild(right);
+        currentEnchantsEl.appendChild(div);
+      });
+    }
+
+    function renderBooks(){
+      booksListEl.innerHTML='';
+      if(state.books.length===0){booksListEl.innerHTML='<div class="small muted" style="padding:8px">No books yet — add a book to populate the list.</div>';updateJSON();return;}
+      state.books.forEach((b,idx)=>{
+        const div=document.createElement('div');div.className='item';
+        const left=document.createElement('div');left.className='left';
+        const enchWrap=document.createElement('div');enchWrap.className='enchants';enchWrap.style.marginLeft='12px';
+        b.enchants.forEach(en=>{const chip=document.createElement('div');chip.className='chip';chip.textContent=en.name+' '+toRoman(en.level);enchWrap.appendChild(chip);});
+        left.appendChild(enchWrap);div.appendChild(left);
+        const right=document.createElement('div');const del=document.createElement('button');del.className='btn ghost';del.title='Remove book';del.innerHTML=svg('trash');del.onclick=()=>{state.books.splice(idx,1);renderBooks();};right.appendChild(del);div.appendChild(right);
+        booksListEl.appendChild(div);
+      });
+      updateJSON();
+    }
+
+    function updateJSON(){
+      const arr=state.books.map(b=>{const obj={};b.enchants.forEach(e=>obj[e.name.toLowerCase()]=e.level);return obj;});
+      try{jsonOutEl.textContent=JSON.stringify(arr,null,2);}catch(e){jsonOutEl.textContent='[]';}
+    }
+
+    function addEnchant(){
+      const name=enchantSelect.value;
+      const level=parseInt(levelSelect.value,10);
+      if(state.currentEnchants.some(e=>e.name===name)){flash(currentEnchantsEl,'Duplicate enchantment ignored');return;}
+      state.currentEnchants.push({name,level});renderCurrentEnchants();
+    }
+
+    function addBook(){
+      if(state.currentEnchants.length===0){flash(booksListEl,'Add at least one enchantment before adding a book');return;}
+      state.books.push({enchants:state.currentEnchants.map(e=>({...e}))});
+      state.currentEnchants=[];renderCurrentEnchants();renderBooks();
+    }
+
+    function clearBook(){state.currentEnchants=[];renderCurrentEnchants();}
+    function clearAll(){state.books=[];renderBooks();}
+
+    function svg(name){if(name==='trash')return'<svg class="icon-sm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';return'';}
+
+    function flash(el,text){const note=document.createElement('div');note.className='small muted';note.style.padding='8px';note.textContent=text;el.prepend(note);setTimeout(()=>{note.remove();},1400);}
+    function toRoman(num){const map={1:'I',2:'II',3:'III',4:'IV',5:'V'};return map[num]||num;}
+
+    addEnchantBtn.addEventListener('click',addEnchant);
+    addBookBtn.addEventListener('click',addBook);
+    clearBookBtn.addEventListener('click',clearBook);
+  </script>
+</body>
+</html>
