@@ -22,35 +22,44 @@
           <pre><code>
 import java, minescript
 import json
-from nbtlib import parse_nbt, Compound
+from nbtlib import parse_nbt
 
-# This is to execute java code
+# Java clipboard helper
 Toolkit = java.JavaClass("java.awt.Toolkit")
 StringSelection = java.JavaClass("java.awt.datatransfer.StringSelection")
 
 def copy_to_clipboard(text: str):
-    # Use java built in clipboard
     clipboard = Toolkit.getDefaultToolkit().getSystemClipboard()
     selection = StringSelection(text)
     clipboard.setContents(selection, None)
 
-# Read player data
-inv = minescript.player(nbt=True)
-parsed = parse_nbt(inv.nbt)["Inventory"].unpack()  # Read player inv and return a python dict object (containing player's inventory)
 books = []
 
-for slot in parsed:
-    if slot["id"] == "minecraft:enchanted_book":
-        components = slot["components"]  # read item's components
-        stored_enchantments = components.get("minecraft:stored_enchantments", {})
-        enchants = {}
-        for k, v in stored_enchantments.items():
-            enchants[k.replace("minecraft:", "")] = v  # Clean enchants name
-        books.append(enchants)
+def parse_inventory(nbt_data, items_key="Inventory"):
+    parsed_books = []
+    parsed = parse_nbt(nbt_data)[items_key].unpack()
+    for slot in parsed:
+        if slot["id"] == "minecraft:enchanted_book":
+            components = slot["components"]
+            stored_enchantments = components.get("minecraft:stored_enchantments", {})
+            enchants = {k.replace("minecraft:", ""): v for k, v in stored_enchantments.items()}
+            parsed_books.append(enchants)
+    return parsed_books
 
-# Finally, copy the diffrent books to clipboard
+# 1. Read player inventory
+player_inv = minescript.player(nbt=True)
+books.extend(parse_inventory(player_inv.nbt))
+
+# 2. Detect any currently open container (chest or other)
+container = minescript.container(nbt=True)  # returns None if no container open
+if container:
+    # Chest NBT uses "Items" key
+    books.extend(parse_inventory(container.nbt, items_key="Items"))
+
+# Copy all collected books to clipboard
 copy_to_clipboard(json.dumps(books))
-print("Books copied to clipboard")
+print(f"{len(books)} enchanted books copied to clipboard")
+
 
           </code></pre>
         </details>
