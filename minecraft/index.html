@@ -15,15 +15,15 @@
       <h3>Book export</h3>
       <p>This minescript script allow to export all enchanted books from all inventories nearby. Used for classification, ranking and selling</p>
       <p>This script uses the library <a href="https://pypi.org/project/nbtlib/">nbtlib</a></p>
+      <p>Due to limitations, the script can only read enchanted books from  the player inventory and not chests</p>
       <div class="code">
         <details>
           <summary>Show code</summary>
           <button onclick="copyCode(this)">Copy</button>
           <pre><code>
-import java, minescript
 import json
 from nbtlib import parse_nbt
-
+import java, minescript
 # Java clipboard helper
 Toolkit = java.JavaClass("java.awt.Toolkit")
 StringSelection = java.JavaClass("java.awt.datatransfer.StringSelection")
@@ -34,7 +34,6 @@ def copy_to_clipboard(text: str):
     clipboard.setContents(selection, None)
 
 books = []
-
 def parse_inventory(nbt_data, items_key="Inventory"):
     parsed_books = []
     parsed = parse_nbt(nbt_data)[items_key].unpack()
@@ -46,19 +45,11 @@ def parse_inventory(nbt_data, items_key="Inventory"):
             parsed_books.append(enchants)
     return parsed_books
 
-# 1. Read player inventory
 player_inv = minescript.player(nbt=True)
 books.extend(parse_inventory(player_inv.nbt))
-
-# 2. Detect any currently open container (chest or other)
-container = minescript.container(nbt=True)  # returns None if no container open
-if container:
-    # Chest NBT uses "Items" key
-    books.extend(parse_inventory(container.nbt, items_key="Items"))
-
-# Copy all collected books to clipboard
 copy_to_clipboard(json.dumps(books))
 print(f"{len(books)} enchanted books copied to clipboard")
+
 
 
           </code></pre>
