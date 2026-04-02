@@ -1,15 +1,9 @@
 [
   {
-    "name": "Counter App",
-    "path": "projects/project1/",
-    "description": "Simple interactive counter",
+    "name": "Jar Fixer",
+    "path": "projects/jar_structure_fixer/",
+    "description": "Minecraft jar structure fixer",
     "tags": ["utility"],
     "featured": true
-  },
-  {
-    "name": "Color Generator",
-    "path": "projects/project2/",
-    "description": "Generate random color palettes",
-    "tags": ["design", "tool"]
   }
 ]
