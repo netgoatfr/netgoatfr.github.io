@@ -1,0 +1,15 @@
+[
+  {
+    "name": "Counter App",
+    "path": "projects/project1/",
+    "description": "Simple interactive counter",
+    "tags": ["utility"],
+    "featured": true
+  },
+  {
+    "name": "Color Generator",
+    "path": "projects/project2/",
+    "description": "Generate random color palettes",
+    "tags": ["design", "tool"]
+  }
+]
