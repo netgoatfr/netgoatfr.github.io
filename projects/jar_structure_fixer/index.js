@@ -1,12 +1,11 @@
 import {
-    BlobReader,
-    BlobWriter,
-    TextReader,
-    TextWriter,
-    ZipReader,
-    ZipWriter,
-} from "jsr:@zip-js/zip-js";
-
+  BlobReader,
+  BlobWriter,
+  TextReader,
+  TextWriter,
+  ZipReader,
+  ZipWriter
+} from "https://cdn.jsdelivr.net/npm/@zip.js/zip.js/+esm";
 // --------- META LOADING ----------
 async function loadMeta() {
     try {
