@@ -97,25 +97,19 @@ function convertStructure(original) {
     }
   };
 
-  const applyMods = (obj) => {
-    if (typeof obj.type === "string") {
-      obj.type = obj.type.replace(/^minecraft:/, "lithostitched:");
-    }
-
-    obj.start_height = { absolute: startHeight };
-    return obj;
-  };
 
   if (original.type === "lithostitched:delegating") {
     original.spawn_condition = heightFilter;
-    return applyMods(original);
-  }
-
-  return {
-    type: "lithostitched:delegating",
-    delegate: applyMods(original),
-    spawn_condition: heightFilter
-  };
+    original.start_height = { absolute: startHeight }
+    return original;
+  } else {  
+    return {
+        type: "lithostitched:delegating",
+        delegate: original,
+        spawn_condition: heightFilter,
+        start_height = { absolute: startHeight }
+        };
+    }
 }
 
 // --------- STEP 1: File open ----------
