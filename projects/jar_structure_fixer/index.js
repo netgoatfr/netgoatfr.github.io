@@ -65,19 +65,29 @@ function isTargetStructure(path) {
     );
 }
 
+function getConfig() {
+    return {
+        minHeight:   parseInt(document.getElementById("cfg-min")?.value   ?? "-100"),
+        maxHeight:   parseInt(document.getElementById("cfg-max")?.value   ?? "800"),
+        startHeight: parseInt(document.getElementById("cfg-start")?.value ?? "-128"),
+    };
+}
+
 function convertStructure(original) {
+    const { minHeight, maxHeight, startHeight } = getConfig();
+
     const TEMPLATE = {
         type: "lithostitched:delegating",
         delegate: null,
         spawn_condition: {
             type: "lithostitched:height_filter",
             range_type: "absolute",
-            permitted_range: { min_inclusive: -100, max_inclusive: 800 }
+            permitted_range: { min_inclusive: minHeight, max_inclusive: maxHeight }
         }
     };
 
     original.type = original.type.replace("minecraft", "lithostitched");
-    original.start_height = { absolute: -128 };
+    original.start_height = { absolute: startHeight };
 
     const structure = { ...TEMPLATE };
     structure.delegate = original;
@@ -329,6 +339,10 @@ function init() {
       </label>
     </div>
     <button id="reset" class="btn-reset">↺ Reset</button>
+    <br>
+    <label>Min height <input type="number" id="cfg-min" value="-100" /></label>
+    <label>Max height <input type="number" id="cfg-max" value="800" /></label>
+    <label>Start height <input type="number" id="cfg-start" value="-128" /></label>
   `);
 
     setInfo(`
