@@ -67,9 +67,9 @@ function isTargetStructure(path) {
 
 function getConfig() {
     return {
-        minHeight:   parseInt(document.getElementById("cfg-min")?.value   ?? "-100"),
-        maxHeight:   parseInt(document.getElementById("cfg-max")?.value   ?? "800"),
-        startHeight: parseInt(document.getElementById("cfg-start")?.value ?? "-128"),
+        minHeight:   parseInt(document.getElementById("cfg-min")?.value   ?? "-256"),
+        maxHeight:   parseInt(document.getElementById("cfg-max")?.value   ?? "1280"),
+        startHeight: parseInt(document.getElementById("cfg-start")?.value ?? "-232"),
     };
 }
 
