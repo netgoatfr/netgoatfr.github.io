@@ -20,6 +20,11 @@ async function loadMeta() {
 }
 
 // --------- HELPERS -------------
+
+const DEFAULT_MIN_HEIGHT = -256;
+const DEFAULT_MAX_HEIGHT = 1280;
+const DEFAULT_START_HEIGHT = -232;
+
 const state = {
     /** @type {ZipReader|null} */
     zipReader: null,
@@ -29,6 +34,10 @@ const state = {
     structureEntries: [],
     /** @type {string|null} */
     fileName: null,
+    /** @type {string} */
+    inputMode: "jar", // "jar" | "datapack"
+    /** @type {string|null} */
+    existingMcmeta: null,
 };
 
 function setApp(html) {
@@ -66,33 +75,47 @@ function isTargetStructure(path) {
 }
 
 function getConfig() {
+    const minHeightInput = parseInt(document.getElementById("cfg-min")?.value);
+    const maxHeightInput = parseInt(document.getElementById("cfg-max")?.value);
+    const startHeightInput = parseInt(document.getElementById("cfg-start")?.value);
+
     return {
-        minHeight:   parseInt(document.getElementById("cfg-min")?.value   ?? "-256"),
-        maxHeight:   parseInt(document.getElementById("cfg-max")?.value   ?? "1280"),
-        startHeight: parseInt(document.getElementById("cfg-start")?.value ?? "-232"),
+        minHeight: isNaN(minHeightInput) ? DEFAULT_MIN_HEIGHT : minHeightInput,
+        maxHeight: isNaN(maxHeightInput) ? DEFAULT_MAX_HEIGHT : maxHeightInput,
+        startHeight: isNaN(startHeightInput) ? DEFAULT_START_HEIGHT : startHeightInput,
     };
 }
-
 function convertStructure(original) {
-    const { minHeight, maxHeight, startHeight } = getConfig();
+  const { minHeight, maxHeight, startHeight } = getConfig();
 
-    const TEMPLATE = {
-        type: "lithostitched:delegating",
-        delegate: null,
-        spawn_condition: {
-            type: "lithostitched:height_filter",
-            range_type: "absolute",
-            permitted_range: { min_inclusive: minHeight, max_inclusive: maxHeight }
-        }
-    };
+  const heightFilter = {
+    type: "lithostitched:height_filter",
+    range_type: "absolute",
+    permitted_range: {
+      min_inclusive: minHeight,
+      max_inclusive: maxHeight
+    }
+  };
 
-    original.type = original.type.replace("minecraft", "lithostitched");
-    original.start_height = { absolute: startHeight };
+  const applyMods = (obj) => {
+    if (typeof obj.type === "string") {
+      obj.type = obj.type.replace(/^minecraft:/, "lithostitched:");
+    }
 
-    const structure = { ...TEMPLATE };
-    structure.delegate = original;
+    obj.start_height = { absolute: startHeight };
+    return obj;
+  };
 
-    return structure;
+  if (original.type === "lithostitched:delegating") {
+    original.spawn_condition = heightFilter;
+    return applyMods(original);
+  }
+
+  return {
+    type: "lithostitched:delegating",
+    delegate: applyMods(original),
+    spawn_condition: heightFilter
+  };
 }
 
 // --------- STEP 1: File open ----------
@@ -115,11 +138,11 @@ async function handleFile(ev) {
         showStatus("No file selected.", "error");
         return;
     }
-    if (!file.name.endsWith(".jar")) {
-        showStatus("Please select a valid .jar file.", "error");
-        ev.target.value = "";
-        return;
-    }
+    const isJar = file.name.endsWith(".jar");
+    const isZip = file.name.endsWith(".zip");
+    if (!isJar && !isZip) { showStatus("Please select a .jar or .zip file.", "error"); return; }
+
+    state.inputMode = isJar ? "jar" : "datapack";
 
     state.fileName = file.name.replace(/\.jar$/i, "");
 
@@ -129,6 +152,14 @@ async function handleFile(ev) {
         state.zipReader = new ZipReader(zipFileReader);
         state.allEntries = await state.zipReader.getEntries();
         state.structureEntries = state.allEntries.filter(e => isTargetStructure(e.filename));
+
+        if (state.inputMode === "datapack") {
+            const mcmetaEntry = state.allEntries.find(e => e.filename === "pack.mcmeta");
+            if (mcmetaEntry) {
+                const text = await mcmetaEntry.getData(new TextWriter());
+                state.existingMcmeta = JSON.parse(text);
+            }
+        }
 
         if (state.structureEntries.length === 0) {
             showStatus("No worldgen structure JSON files found in this .jar.", "warn");
@@ -175,7 +206,7 @@ function renderStructureList() {
     <div class="mod-name-row">
       <label for="mod-name-input">Mod name (used in pack description):</label>
       <input type="text" id="mod-name-input" placeholder="e.g. My Awesome Mod"
-             value="${state.fileName || ""}" autocomplete="off" spellcheck="false" />
+             value="${state.existingMcmeta?.pack?.description || state.fileName || ""}" autocomplete="off" spellcheck="false" />
       <span class="mod-name-preview" id="mod-name-preview"></span>
     </div>
 
@@ -226,7 +257,7 @@ async function processAndExport() {
         return;
     }
 
-    const modNameRaw = (document.getElementById("mod-name-input")?.value || state.fileName || "mod");
+    const modNameRaw = (document.getElementById("mod-name-input")?.value || state.fileName.replace("no_void","") || "mod");
     const modName = normalizeModName(modNameRaw) || "mod";
 
     const btn = document.getElementById("btn-process");
@@ -262,9 +293,20 @@ async function processAndExport() {
                 pack_format: 15
             }
         }, null, 2);
-        await zipWriter.add("pack.mcmeta", new TextReader(mcmeta));
 
-        // Modified structure files
+        if (state.inputMode === "datapack") {
+            // Carry over every file that isn't one of the selected structures
+            const selectedPaths = new Set(selectedEntries.map(e => e.filename));
+            for (const entry of state.allEntries) {
+                if (selectedPaths.has(entry.filename)) continue; // will be replaced below
+                const blob = await entry.getData(new BlobWriter());
+                await zipWriter.add(entry.filename, new BlobReader(blob));
+            }
+        } else {
+            // Original .jar path: write a fresh pack.mcmeta
+            await zipWriter.add("pack.mcmeta", new TextReader(mcmeta));
+        }
+        // Then write the transformed structures (applies to both modes)
         for (const { path, content } of transformed) {
             await zipWriter.add(path, new TextReader(content));
         }
@@ -276,12 +318,12 @@ async function processAndExport() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `no_void_${modName}.zip`;
+        a.download = state.inputMode === "datapack" ? `${state.fileName}_patched.zip` : `no_void_${modName}.zip`;
         a.click();
         setTimeout(() => URL.revokeObjectURL(url), 5000);
 
         showStatus(
-            `<strong>Done!</strong> Exported <code>no_void_${modName}.zip</code> with ${transformed.length} modified structure(s).`,
+            `<strong>Done!</strong> Exported <code>${a.download}</code> with ${transformed.length} modified structure(s).`,
             "success"
         );
     } catch (err) {
@@ -334,19 +376,19 @@ function init() {
     <div class="file-input-wrap">
       <label for="inputFile" class="btn-file">
         <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v9M3.5 6l4-4 4 4M2 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Open .jar
-        <input type="file" id="inputFile" accept=".jar" />
+        Open .jar / .zip
+        <input type="file" id="inputFile" accept=".jar,.zip" />
       </label>
     </div>
     <button id="reset" class="btn-reset">↺ Reset</button>
     <br>
-    <label>Min height <input type="number" id="cfg-min" value="-100" /></label>
-    <label>Max height <input type="number" id="cfg-max" value="800" /></label>
-    <label>Start height <input type="number" id="cfg-start" value="-128" /></label>
+    <label>Min height <input type="number" id="cfg-min" value="${DEFAULT_MIN_HEIGHT}" /></label>
+    <label>Max height <input type="number" id="cfg-max" value="${DEFAULT_MAX_HEIGHT}" /></label>
+    <label>Start height <input type="number" id="cfg-start" value="${DEFAULT_START_HEIGHT}" /></label>
   `);
 
     setInfo(`
-    <p>Load a Minecraft mod <code>.jar</code>, select which worldgen structures to patch, then export a datapack zip that wraps each structure with <a href="https://modrinth.com/mod/lithostitched" target="_blank">Lithostitched</a>'s delegating type and height filter — preventing void spawning.</p>
+    <p>Load a Minecraft mod <code>.jar</code> or an existing datapack <code>.zip</code>, select which worldgen structures to patch, then export a datapack zip that wraps each structure with <a href="https://modrinth.com/mod/lithostitched" target="_blank">Lithostitched</a>'s delegating type and height filter — preventing void spawning.</p>
   `);
 
     bindFileInput();
