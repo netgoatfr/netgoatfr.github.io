@@ -107,7 +107,7 @@ function convertStructure(original) {
         type: "lithostitched:delegating",
         delegate: original,
         spawn_condition: heightFilter,
-        start_height = { absolute: startHeight }
+        start_height: { absolute: startHeight }
         };
     }
 }
