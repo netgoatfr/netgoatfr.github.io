@@ -1,9 +1,9 @@
 [
   {
-    "name": "Jar Fixer",
-    "path": "projects/jar_structure_fixer/",
-    "description": "Minecraft jar structure fixer",
-    "tags": ["utility"],
+    "name": "Structure Datapack Editor",
+    "path": "projects/datapack_editor/",
+    "description": "Modify and export structure datapacks with advanced options for height control, terrain adaptation, and delegation",
+    "tags": ["utility", "minecraft"],
     "featured": true
   }
 ]

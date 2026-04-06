@@ -109,12 +109,22 @@ header {
 /* ===== PROJECT PAGE ZONES ===== */
 #controls {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  /*align-items: center;*/
+  gap: 20px;
   padding: 10px 20px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
+}
+
+#controls * {
+  margin: 1px
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 #app {
