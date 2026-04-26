@@ -1,5 +1,71 @@
 /* Project-specific styles for datapack editor */
 
+.entry-row {
+  padding: 0.75rem;
+  border: 1px solid var(--surface2);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  background: var(--surface1);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.entry-row:hover {
+  border-color: var(--surface3);
+  background: var(--surface2);
+}
+
+.entry-row.selected {
+  border-color: var(--accent);
+  background: var(--surface2);
+  box-shadow: 0 0 0 2px rgba(100, 200, 255, 0.2);
+}
+
+.entry-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.entry-header input[type="checkbox"] {
+  flex-shrink: 0;
+}
+
+.entry-ns {
+  font-weight: bold;
+  color: var(--accent);
+}
+
+.entry-sep {
+  color: var(--muted);
+}
+
+.entry-name {
+  flex: 1;
+  font-family: monospace;
+  font-size: 0.95em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entry-template {
+  flex-shrink: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  border: 1px solid var(--surface3);
+  background: var(--surface1);
+  color: var(--text);
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.entry-template:hover {
+  border-color: var(--accent);
+}
+
 .entry-options {
   margin-left: 1rem;
   display: flex;
